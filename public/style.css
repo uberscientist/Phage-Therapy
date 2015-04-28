@@ -1,0 +1,18 @@
+body {
+    margin: 0px;
+    background-color: black;
+}
+#game {
+    background-color: #FFF;
+    width: 800px;
+    height: 600px;
+    margin: 0px;
+    position: absolute;
+    top: 0px;
+    left: 0px;
+}
+#banner {
+    position: absolute;
+    top: 650px;
+    left: 150px;
+}

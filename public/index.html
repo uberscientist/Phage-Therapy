@@ -1,33 +1,20 @@
 <!doctype html> 
 <html lang="en"> 
+
 <head> 
 	<meta charset="UTF-8" />
   <title>Phage Therapy</title>
-    <script src="//cdn.jsdelivr.net/phaser/2.2.2/phaser.min.js"></script>
-    <style type="text/css">
-        body {
-            margin: 0px;
-            background-color: black;
-        }
-        #game {
-            background-color: #FFF;
-            width: 800px;
-            height: 600px;
-            margin: 0px;
-            position: absolute;
-            top: 0px;
-            left: 0px;
-        }
-        #banner {
-            position: absolute;
-            top: 650px;
-            left: 150px;
-        }
-
-    </style>
+  <link rel="stylesheet" type="text/css" href="style.css">
+  <script src="//cdn.jsdelivr.net/phaser/2.2.2/phaser.min.js"></script>
+  <script src="states/boot.js"></script>
+  <script src="states/title.js"></script>
+  <script src="states/preload.js"></script>
+  <script src="states/thegame.js"></script>
+  <script src="states/gameover.js"></script>
 </head>
+
 <body>
-  <noscript><h1>JS Game, please enable JS</noscript>
+  <noscript><h1>This is a JS Game, please enable JS</noscript>
   <div id="game"></div>
   <div id="banner">
     <a href="https://www.shapeways.com/shops/mindsforge">
@@ -35,301 +22,17 @@
     </a>
   </div>
 
-<script type="text/javascript">
-var view_ring,
-    cursors,
-    fireButton,
-    newbact,
-    floaters,
-    bulletTime = 0,
-    virii = [],
-    vir_emitter,
-    val = 0,
-    scopefg,
-    started = false,
-    pop,
-    score = 0,
-    scoretext,
-    pop2,
-    swoosh,
-    squish,
-    injector;
-
-var game = new Phaser.Game(800, 600, Phaser.AUTO, 'game', { preload: preload, create: create, update: update, render: render });
-
-function preload() {
-  // Audio
-  game.load.audio('ambient', ['LD32.mp3', 'LD32.ogg']);
-  game.load.audio('pop', ['pop.mp3', 'pop.ogg']);
-  game.load.audio('pop2', ['pop2.mp3', 'pop2.ogg']);
-  game.load.audio('swoosh', ['swoosh.mp3', 'swoosh.ogg']);
-  game.load.audio('squish', ['squish.mp3', 'squish.ogg']);
-
-  // Images
-  game.load.spritesheet('virus', 'virus-sheet.png', 20, 20);
-  game.load.image('title', 'title.png');
-  game.load.image('instructions', 'instructions.png');
-  game.load.image('startbutton', 'startbutton.png');
-  game.load.image('floaters', 'floaters.png');
-  game.load.image('bacteria', 'bacteria.png');
-  game.load.image('injector', 'injector.png');
-  game.load.image('scopefg', 'scopefg.png');
-  game.stage.backgroundColor = "#FFF";
-}
-
-function create() {
-  game.physics.startSystem(Phaser.Physics.ARCADE);
-  view_ring = new Phaser.Circle(game.world.centerX, game.world.centerY, game.stage.height);
-  floaters = game.add.tileSprite(0,0,800,600, 'floaters');
-  //bacteria = game.add.sprite(game.world.centerX, game.world.centerY, 'bacteria');
-  injector = game.add.sprite(0,0, 'injector');
-  scopefg = game.add.sprite(0,0, 'scopefg');
-
-  // Audio
-  swoosh = game.add.audio('swoosh');
-  squish = game.add.audio('squish');
-  pop = game.add.audio('pop');
-  pop2 = game.add.audio('pop2');
-  var music = game.add.audio('ambient', 1, true);
-  music.play();
-
-  injector.anchor.setTo(0.1, 0.5);
-  injector.enableBody = true;
-  game.physics.enable(injector, Phaser.Physics.ARCADE);
-
-  title = game.add.sprite(game.world.centerX, game.world.centerY, 'title');
-  title.anchor.setTo(0.5, 1);
-
-  instructions = game.add.sprite(game.world.centerX, game.world.centerY, 'instructions');
-  instructions.alpha = 0;
-  instructions.anchor.setTo(0.5, 1);
-
-  startbutton = game.add.button(
-    game.world.centerX - 10, game.world.centerY + 180,
-    'startbutton',
-    startClick, this
-  );
-
-  startbutton.input.useHandCursor = true;
-  startbutton.alpha = 0.6;
-  startbutton.anchor.setTo(0.5, 1);
-  startbutton.onInputOver.add(startOver, this);
-  startbutton.onInputOut.add(startOut, this);
-
-  scoretext = game.add.text(370,40, "0", {
-    font: "24px Arial",
-    fill: "#111",
-    align: "center"
-  });
-
-  vir_emitter = game.add.emitter();
-  vir_emitter.gravity = 2 - Math.random() * 3;
-
-  virii = game.add.group();
-  virii.setAll('enableBody', true);
-  virii.setAll('physicsBodyType', Phaser.Physics.ARCADE);
-  virii.createMultiple(30, 'virus');
-  virii.setAll('outOfBoundsKill', true);
-  virii.setAll('checkWorldBounds', true);
-  virii.setAll('life', true);
-  virii.setAll('name', 'virus');
-  virii.callAll('animations.add', 'animations', 'inject', [1,2,3,4,5], 10, false);
-
-  bacterias = game.add.group();
-  bacterias.createMultiple(2, 'bacteria');
-  bacterias.setAll('outOfBoundsKill', true);
-  bacterias.setAll('checkWorldBounds', true);
-  bacterias.setAll('life', true);
-
-  cursors = game.input.keyboard.createCursorKeys();
-  fireButton = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
-}
-
-function startOut() {
-  game.add.tween(startbutton).to({ alpha: 0.60 }, 100, "Linear", true);
-  game.add.tween(title).to({ alpha: 1 }, 100, "Linear", true);
-  game.add.tween(instructions).to({ alpha: 0 }, 100, "Linear", true);
-}
-
-function startOver() {
-  game.add.tween(startbutton).to({ alpha: 1 }, 100, "Linear", true);
-  game.add.tween(title).to({ alpha: 0 }, 100, "Linear", true);
-  game.add.tween(instructions).to({ alpha: 1 }, 100, "Linear", true);
-}
-
-function startClick() {
-  swoosh.play();
-  game.add.tween(startbutton).to({ alpha: 0 }, 500, "Linear", true);
-  game.add.tween(title).to({ alpha: 0 }, 500, "Linear", true);
-  var tween = game.add.tween(instructions).to({ alpha: 0 }, 500, "Linear", true);
-  tween.onComplete.add(function() {
-    started = true;
-    title.destroy();
-    instructions.destroy();
-  });
-  startbutton.destroy();
-}
-
-function fireVirus() {
-  if (game.time.now > bulletTime) {
-    var virus = virii.getFirstExists(false);
-    if (virus) {
-      givePoints(-1);
-      pop.play();
-      virus.reset(injector.x - 10, injector.y);
-      virus.anchor.setTo(0.5, 0.5);
-      game.physics.enable(virus, Phaser.Physics.ARCADE);
-
-      virus.body.velocity.setTo(
-        game.world.centerX - injector.x,
-        game.world.centerY - injector.y
-      );
-
-      virus.body.bounce.set(0.9);
-      virus.rotation = injector.rotation - 3;
-      virus.body.mass = 0.1;
-      virus.lifespan = 3000;
-      bulletTime = game.time.now + 300;
-    }
-    // bring stuff to top
-    scopefg.bringToTop();
-  }
-}
-
-function givePoints(amount) {
-  score += amount;
-  scoretext.setText(score);
-}
-
-function update() {
-
-  if(virii.length > 250) {
-    swoosh.play();
-    virii.removeAll();
-    virii.createMultiple(30, 'virus');
-    givePoints(250);
-  }
-
-  // Floating out of focus debris movement
-  floaters.tilePosition.x -= 0.25;
-  floaters.tilePosition.y += 0.15;
-
-  // injector swing right
-  if(cursors.right.isDown && started) {
-    val += 0.05; 
-  }
-
-  // injector swing left
-  if(cursors.left.isDown && started) {
-    val -= 0.05; 
-  }
-
-  // Shoot a viruses out
-  if(fireButton.isDown && started) {
-    fireVirus();
-  }
-
-  var point = Phaser.Circle.circumferencePoint(view_ring, val);
-  injector.x = point.x;
-  injector.y = point.y;
-  injector.rotation = game.physics.arcade.angleBetween(injector, view_ring) + 1.5;
-
-  // Collision detection
-  game.physics.arcade.overlap(virii, bacterias, virusContact, null, this);
-
-  // Spawn more bacteria if there's less than 2
-  if (bacterias.total < 2) {
-    if (bacterias.length <= 0) {
-      bacterias.createMultiple(2, 'bacteria');
-    }
-    newbact = bacterias.getFirstExists(false);
-    if (newbact) {
-      newbact.alpha = 0;
-      var tween = game.add.tween(newbact).to({ alpha: 1 }, 100, "Linear", true);
-      game.physics.enable(newbact, Phaser.Physics.ARCADE);
-      newbact.scale.set(.25, .25);
-      newbact.body.width = newbact.width; 
-      newbact.body.height = newbact.height;
-      newbact.enableBody = true;
-      newbact.body.collideWorldBounds = true;
-      newbact.reset(240 + Math.random() * 220, 50 + Math.random() * 350);
-      newbact.anchor.setTo(0.5, 0.5);
-      newbact.body.velocity.setTo(-5 + Math.random() * 15, -5 + Math.random() * 15);
-      //var rot = 3 - Math.random() * 6;
-      //newbact.rotation = rot;
-      newbact.body.mass = 2;
-      newbact.health = 100;
-      bulletTime = game.time.now + 300;
-    }
-    // bring stuff to top
-    scopefg.bringToTop();
-    if(startbutton) {
-      startbutton.bringToTop();
-      title.bringToTop();
-      instructions.bringToTop();
-    }
-  }
-}
-function render() {
-  //game.debug.spriteInfo(injector, 20, 100);
-  //game.debug.spriteInfo(newbact, 20, 100);
-  //game.debug.body(bacterias);
-  //game.debug.body(newbact);
-}
-
-var virus_count = 0;
-function virusCollect(i, v) {
-  virus_count++;
-  console.log(virus_count);
-  v.destroy();
-}
-
-function virusContact(v, b) {
-  if (b.name === 'virus') {
-    var temp = v;
-    v = b;
-    b = temp;
-  }
-  v.alpha = 1;
-
-
-  if(v.alive === true) {
-    squish.play();
-    givePoints(1);
-    b.health -= 20;
-    //game.add.tween(b).to({ height: b.height * 1.13, width: b.width * 1.13}, 500, "Linear", true);
-    b.scale.set(b.scale.x += 0.07, b.scale.y += 0.07);
-    b.body.rotation = b.rotation;
-    if(v.body.velocity.y > 0) {
-      v.body.angularVelocity = 0;
-      v.rotation = 0;
-    } else {
-      v.body.angularVelocity = 0;
-      v.rotation = Math.PI;
-    }
-  }
-
-  v.alive = false;
-
-  v.body.velocity.setTo(b.body.velocity.x, b.body.velocity.y);
-  v.animations.play('inject');
-
-  if(b.health <= 0) {
-    // dead bacteria
-    pop2.play();
-    vir_emitter.x = b.x;
-    vir_emitter.y = b.y;
-    vir_emitter.makeParticles('virus', 0, 20, true, false);
-    vir_emitter.setAlpha(1, 0.2, 3000);
-    vir_emitter.start(true, 5000, null, 20);
-    vir_emitter.callAll('animations.add', 'animations', 'inject', [1,2,3,4,5], 10, false);
-    virii.addMultiple(vir_emitter.children);
-    b.destroy();
-    givePoints(10);
-  }
-}
-
-</script>
-
+  <script type="text/javascript">
+    (function() {
+      var game = new Phaser.Game(800, 600, Phaser.AUTO, 'game');
+      game.state.add("Boot", boot);
+      game.state.add("Preload", preload);
+      game.state.add("Title", title);
+      game.state.add("theGame", theGame);
+      game.state.add("gameOver", gameOver);
+      game.state.start("Boot");
+    })();
+  </script>
 </body>
+
 </html>
