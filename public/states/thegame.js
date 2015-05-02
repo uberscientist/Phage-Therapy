@@ -1,7 +1,6 @@
 var theGame = function(game) {
   this.val = 0;
   this.bulletTime = 0;
-  this.started = false;
   this.score = 0;
 }
 
@@ -20,9 +19,9 @@ theGame.prototype = {
     this.pop2 = this.game.add.audio('pop2');
 
     this.injector = this.game.add.sprite(0,0, 'injector');
-    this.injector.anchor.setTo(0.1, 0.5);
-    this.injector.enableBody = true;
-    this.game.physics.enable(this.injector, Phaser.Physics.ARCADE);
+    this.injector.anchor.setTo(0.0, 0.7);
+    //this.injector.enableBody = true;
+    //this.game.physics.enable(this.injector, Phaser.Physics.ARCADE);
 
     this.vir_emitter = this.game.add.emitter();
     this.vir_emitter.gravity = 2 - Math.random() * 3;
@@ -99,17 +98,17 @@ theGame.prototype = {
     this.floaters.tilePosition.y += 0.15;
 
     // injector swing right
-    if(this.cursors.right.isDown && started) {
+    if(this.cursors.right.isDown) {
       this.val += 0.05; 
     }
 
     // injector swing left
-    if(this.cursors.left.isDown && started) {
+    if(this.cursors.left.isDown) {
       this.val -= 0.05; 
     }
 
     // Shoot a viruses out
-    if(this.fireButton.isDown && started) {
+    if(this.fireButton.isDown) {
       this.fireVirus();
     }
 
@@ -140,20 +139,13 @@ theGame.prototype = {
         newbact.anchor.setTo(0.5, 0.5);
         newbact.body.velocity.setTo(-5 + Math.random() * 15, -5 + Math.random() * 15);
         //var rot = 3 - Math.random() * 6;
-        //newbact.rotation = rot;
+        //newbact.rotation = rot; // no rotation w/arcade physics
         newbact.body.mass = 2;
         newbact.health = 100;
         bulletTime = this.game.time.now + 300;
       }
       // bring stuff to top
       this.scopefg.bringToTop();
-      /*
-      if(this.startbutton) {
-        this.startbutton.bringToTop();
-        this.title.bringToTop();
-        this.instructions.bringToTop();
-      }
-      */
     }
   },
 

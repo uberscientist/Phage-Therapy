@@ -18,13 +18,13 @@
   <div id="game"></div>
   <div id="banner">
     <a href="https://www.shapeways.com/shops/mindsforge">
-      <img src="img/banner2.png" />
+      <img src="banner2.png" />
     </a>
   </div>
 
   <script type="text/javascript">
     (function() {
-      var game = new Phaser.Game(800, 600, Phaser.WEBGL, 'game');
+      var game = new Phaser.Game(800, 600, Phaser.CANVAS, 'game');
       game.state.add("Boot", boot);
       game.state.add("Preload", preload);
       game.state.add("Title", title);
