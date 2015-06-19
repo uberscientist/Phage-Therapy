@@ -22,6 +22,7 @@ preload.prototype = {
     this.game.load.image('bacteria', 'img/bacteria.png');
     this.game.load.image('injector', 'img/injector.png');
     this.game.load.image('scopefg', 'img/scopefg.png');
+    this.game.load.image('slider', 'img/slider.png');
   },
   create: function() {
     this.game.state.start("Title");

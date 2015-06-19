@@ -2,6 +2,13 @@ var theGame = function(game) {
   this.val = 0;
   this.bulletTime = 0;
   this.score = 0;
+  this.combos = 0;
+  this.cx = 370;
+  this.cy = 40;
+  this.ct = 0;
+  this.ctt = -1;
+  this.mx = 0;
+  this.my = 0;
 }
 
 theGame.prototype = {
@@ -19,9 +26,12 @@ theGame.prototype = {
     this.pop2 = this.game.add.audio('pop2');
 
     this.injector = this.game.add.sprite(0,0, 'injector');
-    this.injector.anchor.setTo(0.0, 0.7);
-    //this.injector.enableBody = true;
-    //this.game.physics.enable(this.injector, Phaser.Physics.ARCADE);
+    this.injector.anchor.setTo(0.1, 0.5);
+    this.injector.enableBody = true;
+    this.game.physics.enable(this.injector, Phaser.Physics.ARCADE);
+
+    this.slider = this.game.add.sprite(100,150, 'slider');
+    this.slider.bringToTop();
 
     this.vir_emitter = this.game.add.emitter();
     this.vir_emitter.gravity = 2 - Math.random() * 3;
@@ -51,6 +61,11 @@ theGame.prototype = {
       align: "center"
     });
 
+    this.combostext = this.game.add.text(0,0, "0", {
+	    font: "24px Arial",
+	    fill: "#111",
+	    align: "center"
+    });
   },
 
   fireVirus: function() {
@@ -76,15 +91,48 @@ theGame.prototype = {
       }
       // bring stuff to top
       this.scopefg.bringToTop();
+      this.slider.bringToTop();
     }
   },
 
   givePoints: function(amount) {
-    this.score += amount; //TODO: attach score variable to game? global?
-    this.scoretext.setText(this.score);
+	  this.score += amount; //TODO: attach score variable to game? global?
+	  this.scoretext.setText(this.score);
+  },
+
+  addCombos: function(amount) {
+		this.combos += amount;
+		this.combostext.setText(this.combos);
   },
 
   update: function() {
+	  this.mx = this.game.input.mousePointer.x;
+	  this.my = this.game.input.mousePointer.y;
+	  
+	  if(this.mx > 100) {
+		  if(this.my > 150) {
+			  if(this.mx < 190) {
+				  if(this.my < 510) {
+					  if(this.game.input.mouse.button == 0) {
+						  console.log(this.injector.angle);
+						  this. val = this.my/57;
+					  }
+				  }
+			  }
+		  }
+	  }
+
+	  this.combostext.position.x = this.cx;
+	  this.combostext.position.y = this.cy;
+	  this.ct += this.ctt;
+	  //console.log (this.ct);
+
+	  if(this.ct <= 0) {
+		  this.combos = 0;
+		  this.addCombos(this.combos * -1);
+		  this.cx = 0;
+		  this.cy = 0;
+	  }
 
     if(this.virii.length > 250) {
       this.swoosh.play();
@@ -138,14 +186,13 @@ theGame.prototype = {
         newbact.reset(240 + Math.random() * 220, 50 + Math.random() * 350);
         newbact.anchor.setTo(0.5, 0.5);
         newbact.body.velocity.setTo(-5 + Math.random() * 15, -5 + Math.random() * 15);
-        //var rot = 3 - Math.random() * 6;
-        //newbact.rotation = rot; // no rotation w/arcade physics
         newbact.body.mass = 2;
         newbact.health = 100;
         bulletTime = this.game.time.now + 300;
       }
       // bring stuff to top
       this.scopefg.bringToTop();
+      this.slider.bringToTop();
     }
   },
 
@@ -159,7 +206,6 @@ theGame.prototype = {
   virusCollect: function(i, v) {
     this.game.virus_count = 0; //TODO: maybe actually collect viruses?
     this.game.virus_count++;
-    console.log(this.game.virus_count);
     v.destroy();
   },
 
@@ -197,6 +243,8 @@ theGame.prototype = {
       this.pop2.play();
       this.vir_emitter.x = b.x;
       this.vir_emitter.y = b.y;
+      this.cx = b.x;
+      this.cy = b.y;
       this.vir_emitter.makeParticles('virus', 0, 20, true, false);
       this.vir_emitter.setAlpha(1, 0.2, 3000);
       this.vir_emitter.start(true, 5000, null, 20);
@@ -204,6 +252,8 @@ theGame.prototype = {
       this.virii.addMultiple(this.vir_emitter.children);
       b.destroy();
       this.givePoints(10);
+      this.addCombos(1);
+      this.ct = 50;
     }
   }
 }
