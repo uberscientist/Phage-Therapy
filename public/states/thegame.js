@@ -39,11 +39,11 @@ theGame.prototype = {
     this.virii = this.game.add.group();
     this.virii.setAll('enableBody', true);
     this.virii.setAll('physicsBodyType', Phaser.Physics.ARCADE);
-    this.virii.createMultiple(30, 'virus');
+    this.virii.createMultiple(30, 'virusY');
     this.virii.setAll('outOfBoundsKill', true);
     this.virii.setAll('checkWorldBounds', true);
     this.virii.setAll('life', true);
-    this.virii.setAll('name', 'virus');
+    this.virii.setAll('name', 'virusY');
     this.virii.callAll('animations.add', 'animations', 'inject', [1,2,3,4,5], 10, false);
 
     this.bacterias = this.game.add.group();

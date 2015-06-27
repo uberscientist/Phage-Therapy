@@ -14,7 +14,10 @@ preload.prototype = {
     this.game.load.audio('squish', ['sound/squish.mp3', 'sound/squish.ogg']);
 
     // Images
-    this.game.load.spritesheet('virus', 'img/virus-sheet.png', 20, 20);
+    this.game.load.spritesheet('virusR', 'img/virus-sheet-r.png', 20, 20);
+    this.game.load.spritesheet('virusY', 'img/virus-sheet-y.png', 20, 20);
+    this.game.load.spritesheet('virusB', 'img/virus-sheet-b.png', 20, 20);
+
     this.game.load.image('title', 'img/title.png');
     this.game.load.image('instructions', 'img/instructions.png');
     this.game.load.image('startbutton', 'img/startbutton.png');
